@@ -1,0 +1,57 @@
+name: Build Multi-Language Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Chinese package
+        shell: pwsh
+        run: |
+          Compress-Archive -Path LICENSE,README.zh-CN.md,edge-remote-debugging-setup-chinese.bat,edge-remote-debugging-setup-chinese.ps1 -DestinationPath edge-cdp-remote-debugging-chinese-${{ inputs.tag }}.zip -Force
+
+      - name: Build English package
+        shell: pwsh
+        run: |
+          Compress-Archive -Path LICENSE,README.md,edge-remote-debugging-setup-english.bat,edge-remote-debugging-setup-english.ps1 -DestinationPath edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip -Force
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }}
+          files: |
+            edge-cdp-remote-debugging-chinese-${{ inputs.tag }}.zip
+            edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip
+          body: |
+            ## 下载 / Download
+
+            - 中文版：`edge-cdp-remote-debugging-chinese-${{ inputs.tag }}.zip`
+            - English: `edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip`
+
+            ## 说明 / Notes
+
+            Both versions are functionally identical. Extract the zip and double-click the `.bat` file to run.
+
+            两个版本功能完全相同，仅界面语言不同。解压后双击 `.bat` 文件即可运行。
+
+            See the README inside the zip for detailed usage.
+
+            详细用法请参阅压缩包内的 README。
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
