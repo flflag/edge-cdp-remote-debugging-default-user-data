@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v1.0)'
+        description: 'Release tag (e.g. v1.0.0)'
         required: true
         type: string
 
@@ -24,10 +24,13 @@ jobs:
         run: |
           Compress-Archive -Path LICENSE,README.zh-CN.md,edge-remote-debugging-setup-chinese.bat,edge-remote-debugging-setup-chinese.ps1 -DestinationPath edge-cdp-remote-debugging-chinese-${{ inputs.tag }}.zip -Force
 
-      - name: Build English package
-        shell: pwsh
-        run: |
-          Compress-Archive -Path LICENSE,README.md,edge-remote-debugging-setup-english.bat,edge-remote-debugging-setup-english.ps1 -DestinationPath edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip -Force
+      # ============================================================
+      # 英文版打包步骤（暂时注释，等英文版脚本准备好后取消注释）
+      # ============================================================
+      # - name: Build English package
+      #   shell: pwsh
+      #   run: |
+      #     Compress-Archive -Path LICENSE,README.md,edge-remote-debugging-setup-english.bat,edge-remote-debugging-setup-english.ps1 -DestinationPath edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip -Force
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
@@ -36,22 +39,26 @@ jobs:
           name: ${{ inputs.tag }}
           files: |
             edge-cdp-remote-debugging-chinese-${{ inputs.tag }}.zip
-            edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip
+            # edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip
           body: |
             ## 下载 / Download
 
             - 中文版：`edge-cdp-remote-debugging-chinese-${{ inputs.tag }}.zip`
-            - English: `edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip`
+            <!-- - English: `edge-cdp-remote-debugging-english-${{ inputs.tag }}.zip` -->
 
             ## 说明 / Notes
 
-            Both versions are functionally identical. Extract the zip and double-click the `.bat` file to run.
+            <!-- Both versions are functionally identical. Extract the zip and double-click the `.bat` file to run. -->
 
             两个版本功能完全相同，仅界面语言不同。解压后双击 `.bat` 文件即可运行。
 
-            See the README inside the zip for detailed usage.
+            <!-- See the README inside the zip for detailed usage. -->
 
             详细用法请参阅压缩包内的 README。
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#等你英文版脚本准备好后，做这三件事：
+#取消 Build English package 整个 step 的注释：删掉那 5 行前面的 #。
+#取消 files: 里英文行的注释：删掉 # edge-cdp-remote-debugging-english-... 前面的 #。
+#取消 body: 里英文说明的注释：把 <!-- ... --> 两端的标记删掉。
